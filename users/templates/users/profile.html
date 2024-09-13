@@ -1,0 +1,53 @@
+<!-- users/templates/users/profile.html -->
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2>{{ profile_user.username }}'s Profile</h2>
+
+            <div class="profile-photo">
+                <img src="{{ profile_user.get_profile_photo_url }}" alt="Profile Photo" class="img-thumbnail" style="max-width: 150px;">
+            </div>
+
+            <!-- Only show friend/follow options if viewing someone else's profile -->
+            {% if user != profile_user %}
+                <div class="mt-3">
+                    <!-- Friend Request -->
+                    {% if sent_friend_request %}
+                        <p>Friend request sent!</p>
+                    {% elif received_friend_request %}
+                        <form method="POST" action="{% url 'accept_friend_request' profile_user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Accept Friend Request</button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{% url 'send_friend_request' profile_user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Send Friend Request</button>
+                        </form>
+                    {% endif %}
+
+                    <!-- Follow/Unfollow -->
+                    {% if is_following %}
+                        <form method="POST" action="{% url 'unfollow_user' profile_user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Unfollow</button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{% url 'follow_user' profile_user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-info">Follow</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
